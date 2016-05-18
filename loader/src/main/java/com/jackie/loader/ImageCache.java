@@ -42,78 +42,44 @@
 
 package com.jackie.loader;
 
-
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.widget.ImageView;
-
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import android.util.LruCache;
 
 /**
- * 图片加载类
+ * 对图片缓存实现的类
  * Created by on 16/5/18.
  *
  * @author Jackie Zhu
- * @version 1.1
+ * @version 1.0
  */
-public class ImageLoader {
-    // 图片缓存
-    ImageCache mImageCache = new ImageCache();
-    // 线程池,线程数量为CPU的数量
-    ExecutorService mExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime()
-            .availableProcessors());
+public class ImageCache {
 
-    public ImageLoader() {
+    // URL对应的图片缓存
+    LruCache<String, Bitmap> mImageCache;
+
+    public ImageCache() {
+        initImageCache();
     }
 
-    /**
-     * {@code imageView}显示指定{@code url}路径的图片,如果url已经缓存了可以使用缓存中的图片,不需要再
-     * 连接网络来下载这个图片,从而节约了流量和时间
-     * @param url 图片所在的路径
-     * @param imageView 显示指定图片的{@link ImageView}
-     */
-    public void displayImage(final String url, final ImageView imageView) {
-        Bitmap bitmap = mImageCache.get(url);
-        imageView.setTag(url);
-        if (bitmap != null) {
-            imageView.setImageBitmap(bitmap);
-        }
-        mExecutorService.submit(new Runnable() {
+    private void initImageCache() {
+        // 计算可用的最大内存
+        int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        // 取四分之一的可用内存作为缓存
+        int cacheSize = maxMemory / 4;
+
+        mImageCache = new LruCache<String, Bitmap>(cacheSize){
             @Override
-            public void run() {
-                Bitmap bitmap = downloadImage(url);
-                if (bitmap == null) {
-                    return;
-                }
-                if (url.equals(imageView.getTag())) {
-                    imageView.setImageBitmap(bitmap);
-                }
-                mImageCache.put(url, bitmap);
+            protected int sizeOf(String key, Bitmap value) {
+                return value.getRowBytes()* value.getHeight() / 1024;
             }
-        });
+        };
     }
 
-    /**
-     * 从网络中下载图片
-     * @param imageUrl 图片的网络路径
-     * @return 下载到的图片,如果没有下载到图片返回空
-     */
-    private Bitmap downloadImage(String imageUrl) {
-        Bitmap result = null;
-        try {
-            URL url = new URL(imageUrl);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            result = BitmapFactory.decodeStream(conn.getInputStream());
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return result;
+    public Bitmap put(String url, Bitmap bitmap) {
+        return mImageCache.put(url, bitmap);
+    }
+
+    public Bitmap get(String url) {
+        return mImageCache.get(url);
     }
 }
