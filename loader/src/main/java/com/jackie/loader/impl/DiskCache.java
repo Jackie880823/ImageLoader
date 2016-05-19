@@ -43,10 +43,12 @@
 package com.jackie.loader.impl;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import com.jackie.loader.CloseUtils;
 import com.jackie.loader.ImageCache;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
@@ -58,26 +60,36 @@ import java.io.FileOutputStream;
  * @version 1.0
  */
 public class DiskCache implements ImageCache {
-    FileOutputStream mFileOutputStream;
     String cacheDir = "/sdcard/picture/";
 
     @Override
     public Bitmap put(String url, Bitmap bitmap) {
         int index = url.lastIndexOf(File.separator);
         String name = url.substring(index + 1);
+        FileOutputStream fileOutputStream = null;
         try {
-            mFileOutputStream = new FileOutputStream(cacheDir + name);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, mFileOutputStream);
+            fileOutputStream = new FileOutputStream(cacheDir + url);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fileOutputStream);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {
-            CloseUtils.closeQuietly(mFileOutputStream);
+            CloseUtils.closeQuietly(fileOutputStream);
         }
         return bitmap;
     }
 
     @Override
     public Bitmap get(String url) {
-        return null;
+        Bitmap result = null;
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream(cacheDir + url);
+            result = BitmapFactory.decodeStream(fileInputStream);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            CloseUtils.closeQuietly(fileInputStream);
+        }
+        return result;
     }
 }

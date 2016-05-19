@@ -53,7 +53,18 @@ import android.graphics.Bitmap;
  */
 public interface ImageCache {
 
+    /**
+     * put网络路径的图片到缓存
+     * @param url 图片的网络路径
+     * @param bitmap 对应路径下载很到的图片
+     * @return 返回缓存的这张图片
+     */
     Bitmap put(String url, Bitmap bitmap);
 
+    /**
+     * 获取路径中对应缓存的图片,若图片没有被缓存则返回空
+     * @param url 图片的网络路径
+     * @return 对应的缓存图片,若不存在则返回为空
+     */
     Bitmap get(String url);
 }
