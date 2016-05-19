@@ -40,20 +40,26 @@
  *             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  */
 
-package com.jackie.loader;
+package com.jackie.loader.impl;
 
 import android.graphics.Bitmap;
+import com.jackie.loader.ImageCache;
 
 /**
- * 对图片缓存接口
- * Created by on 16/5/18.
+ * 对{@link ImageCache}的实现类,把网络路径对应的图片缓存到本地存储器当中
+ * Created by on 16/5/19.
  *
  * @author Jackie Zhu
- * @version 2.0
+ * @version 1.0
  */
-public interface ImageCache {
+public class DiskCache implements ImageCache {
+    @Override
+    public Bitmap put(String url, Bitmap bitmap) {
+        return null;
+    }
 
-    Bitmap put(String url, Bitmap bitmap);
-
-    Bitmap get(String url);
+    @Override
+    public Bitmap get(String url) {
+        return null;
+    }
 }

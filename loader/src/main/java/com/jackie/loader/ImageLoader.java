@@ -46,6 +46,7 @@ package com.jackie.loader;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.widget.ImageView;
+import com.jackie.loader.impl.MemoryCache;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
@@ -63,12 +64,16 @@ import java.util.concurrent.Executors;
  */
 public class ImageLoader {
     // 图片缓存
-    ImageCache mImageCache = new ImageCache();
+    ImageCache mImageCache = new MemoryCache();
     // 线程池,线程数量为CPU的数量
     ExecutorService mExecutorService = Executors.newFixedThreadPool(Runtime.getRuntime()
             .availableProcessors());
 
     public ImageLoader() {
+    }
+
+    public void setmImageCache(ImageCache mImageCache) {
+        this.mImageCache = mImageCache;
     }
 
     /**

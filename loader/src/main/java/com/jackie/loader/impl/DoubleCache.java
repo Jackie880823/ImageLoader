@@ -40,20 +40,36 @@
  *             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  */
 
-package com.jackie.loader;
+package com.jackie.loader.impl;
 
 import android.graphics.Bitmap;
+import com.jackie.loader.ImageCache;
 
 /**
- * 对图片缓存接口
- * Created by on 16/5/18.
+ * 对{@link ImageCache}的实现类,把网络路径对应的图片双缓存到内存和存储器中
+ * Created by on 16/5/19.
  *
  * @author Jackie Zhu
- * @version 2.0
+ * @version 1.0
  */
-public interface ImageCache {
+public class DoubleCache implements ImageCache {
 
-    Bitmap put(String url, Bitmap bitmap);
+    private MemoryCache memoryCache = new MemoryCache();
+    private DiskCache mDiskCache = new DiskCache();
 
-    Bitmap get(String url);
+    @Override
+    public Bitmap put(String url, Bitmap bitmap) {
+        memoryCache.put(url, bitmap);
+        mDiskCache.put(url, bitmap);
+        return bitmap;
+    }
+
+    @Override
+    public Bitmap get(String url) {
+        Bitmap result = memoryCache.get(url);
+        if (result == null) {
+            result = mDiskCache.get(url);
+        }
+        return result;
+    }
 }

@@ -40,20 +40,49 @@
  *             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  */
 
-package com.jackie.loader;
+package com.jackie.loader.impl;
 
 import android.graphics.Bitmap;
+import android.util.LruCache;
+import com.jackie.loader.ImageCache;
 
 /**
- * 对图片缓存接口
- * Created by on 16/5/18.
+ * 对{@link ImageCache}的实现类,把网络路径对应的图片缓存到内存中
+ * Created by on 16/5/19.
  *
  * @author Jackie Zhu
- * @version 2.0
+ * @version 1.0
  */
-public interface ImageCache {
+public class MemoryCache implements ImageCache {
 
-    Bitmap put(String url, Bitmap bitmap);
+    // URL对应的图片缓存
+    private LruCache<String, Bitmap> mImageCache;
 
-    Bitmap get(String url);
+    public MemoryCache() {
+        initImageCache();
+    }
+
+    private void initImageCache() {
+        // 计算可用的最大内存
+        int maxMemory = (int) (Runtime.getRuntime().maxMemory() / 1024);
+        // 取四分之一的可用内存作为缓存
+        int cacheSize = maxMemory / 4;
+
+        mImageCache = new LruCache<String, Bitmap>(cacheSize){
+            @Override
+            protected int sizeOf(String key, Bitmap value) {
+                return value.getRowBytes()* value.getHeight() / 1024;
+            }
+        };
+    }
+
+    @Override
+    public Bitmap put(String url, Bitmap bitmap) {
+        return null;
+    }
+
+    @Override
+    public Bitmap get(String url) {
+        return null;
+    }
 }
