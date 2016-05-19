@@ -40,44 +40,29 @@
  *             $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
  */
 
-package com.jackie.loader.impl;
+package com.jackie.loader;
 
-import android.graphics.Bitmap;
-import com.jackie.loader.CloseUtils;
-import com.jackie.loader.ImageCache;
-
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.Closeable;
+import java.io.IOException;
 
 /**
- * 对{@link ImageCache}的实现类,把网络路径对应的图片缓存到本地存储器当中
+ * 隔离Closeable接口的关闭功能,提高代码的灵活性
  * Created by on 16/5/19.
  *
  * @author Jackie Zhu
  * @version 1.0
  */
-public class DiskCache implements ImageCache {
-    FileOutputStream mFileOutputStream;
-    String cacheDir = "/sdcard/picture/";
-
-    @Override
-    public Bitmap put(String url, Bitmap bitmap) {
-        int index = url.lastIndexOf(File.separator);
-        String name = url.substring(index + 1);
-        try {
-            mFileOutputStream = new FileOutputStream(cacheDir + name);
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, mFileOutputStream);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        } finally {
-            CloseUtils.closeQuietly(mFileOutputStream);
-        }
-        return bitmap;
+public final class CloseUtils {
+    private CloseUtils() {
     }
 
-    @Override
-    public Bitmap get(String url) {
-        return null;
+    public static void closeQuietly(Closeable closeable) {
+        if (closeable != null) {
+            try {
+                closeable.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
